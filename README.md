@@ -4,6 +4,8 @@ Microsoft Teams understands some Markdown as you type, but pasted Markdown stays
 
 This app renders Markdown locally and copies simplified HTML that you can paste into Teams with formatting intact.
 
+To preserve visual quality when pasted into Teams, it applies smart, sometimes non-obvious transformations—especially to headings.
+
 ![Markdown to Teams app showing rendered Markdown and copyable HTML output](assets/screenshot.png)
 
 ## How transformation works
