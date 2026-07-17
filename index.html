@@ -326,22 +326,22 @@
     #preview > :first-child { margin-top: 0; }
     #preview > :last-child { margin-bottom: 0; }
     #preview h1 {
-      margin: 20px 0 4px;
+      margin: 20px 0 6px;
       font-size: 20px;
       font-weight: 700;
       line-height: 1.3;
     }
     #preview h2 {
-      margin: 20px 0 4px;
-      font-size: 20px;
-      font-weight: 600;
-      line-height: 1.3;
+      margin: 16px 0 4px;
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.33;
     }
     #preview h3 {
       margin: 12px 0 4px;
-      font-size: 18px;
-      font-weight: 600;
-      line-height: 1.5;
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.38;
     }
     #preview h4, #preview h5, #preview h6 {
       margin: 12px 0 4px;
@@ -511,11 +511,11 @@
         <div class="settings-field">
           <label for="heading-mode">Heading style</label>
           <select id="heading-mode">
-            <option value="teams">Teams-optimized</option>
-            <option value="native">Native headings</option>
-            <option value="bold">All bold text</option>
+            <option value="teams">Teams-optimized (1→H1, 2→H2, 3+→bold)</option>
+            <option value="native">Native headings (1–6→H1–H6)</option>
+            <option value="bold">All bold text (all→bold)</option>
           </select>
-          <p class="settings-help" id="heading-help">Top three levels become H1/H2/H3; deeper headings become bold text.</p>
+          <p class="settings-help" id="heading-help">Top two levels become H1/H2; deeper headings become bold text.</p>
           <p class="settings-help">Applied immediately and saved in this browser.</p>
         </div>
       </div>
@@ -731,10 +731,13 @@
           const content = inline(heading[2].replace(/\s+#+\s*$/, ""));
           const sourceLevel = heading[1].length;
           const level = headingLevels.get(sourceLevel) || 1;
-          if (headingTransform === "bold" || (headingTransform === "teams" && level > 3)) {
+          if (headingTransform === "bold" || (headingTransform === "teams" && level > 2)) {
             out.push(`<p class="projected-heading"><strong>${content}</strong></p>`);
           } else {
-            out.push(`<h${level}>${content}</h${level}>`);
+            const headingContent = headingTransform === "teams"
+              ? `<strong>${content}</strong>`
+              : content;
+            out.push(`<h${level}>${headingContent}</h${level}>`);
           }
           i++;
           continue;
@@ -967,7 +970,7 @@
 
     function updateHeadingHelp() {
       const help = {
-        teams: "Top three levels become H1/H2/H3; deeper headings become bold text.",
+        teams: "Top two levels become H1/H2; deeper headings become bold text.",
         native: "Every relative level remains a native heading; H3+ may look small in Teams.",
         bold: "Every heading becomes bold body text with no native heading sizes."
       };

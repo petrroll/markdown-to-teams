@@ -8,7 +8,9 @@ This app renders Markdown locally and copies simplified HTML that you can paste 
 
 Markdown is rendered locally, then copied as simplified rich HTML because Teams does not render pasted Markdown.
 
-The default **Teams-optimized** heading mode normalizes the relative hierarchy, maps the first three levels to H1/H2/H3, and converts deeper levels to bold body text. **Native headings** keeps every normalized level as a heading, while **All bold text** converts all headings to bold body text. The selected mode is remembered in browser `localStorage`.
+The default **Teams-optimized** heading mode normalizes the relative hierarchy, maps the first two levels to H1/H2, and converts deeper levels to bold body text. **Native headings** keeps every normalized level as a heading, while **All bold text** converts all headings to bold body text. The selected mode is remembered in browser `localStorage`.
+
+Microsoft Teams renders pasted H3 and deeper headings smaller than normal body text in messages and replies, making them look absurdly tiny, so Teams-optimized mode keeps only explicit bold H1/H2 and converts H3+ into bold body text.
 
 Two-space indentation creates nested lists. Ordinary paragraph breaks are preserved, while headings and lists use native spacing to avoid doubled gaps.
 
