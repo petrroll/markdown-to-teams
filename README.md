@@ -4,20 +4,41 @@ Microsoft Teams understands some Markdown as you type, but pasted Markdown stays
 
 This app renders Markdown locally and copies simplified HTML that you can paste into Teams with formatting intact.
 
+![Markdown for Teams app showing rendered Markdown and copyable HTML output](assets/screenshot.png)
+
 ## How transformation works
 
 Markdown is rendered locally, then copied as simplified rich HTML because Teams does not render pasted Markdown.
 
-The default **Teams-optimized** heading mode normalizes the relative hierarchy, maps the first two levels to H1/H2, and converts deeper levels to bold body text. **Native headings** keeps every normalized level as a heading, while **All bold text** converts all headings to bold body text. The selected mode is remembered in browser `localStorage`.
+### Heading modes
 
-Microsoft Teams renders pasted H3 and deeper headings smaller than normal body text in messages and replies, making them look absurdly tiny, so Teams-optimized mode keeps only explicit bold H1/H2 and converts H3+ into bold body text.
+Teams renders pasted H3+ headings *smaller* than body text in messages and replies, making them look absurdly tiny. Each mode first normalizes the relative heading hierarchy, then:
 
-Two-space indentation creates nested lists. Ordinary paragraph breaks are preserved, while headings and lists use native spacing to avoid doubled gaps.
+| Mode | Behavior |
+| --- | --- |
+| **Teams-optimized** (default) | Relative levels 1/2 → explicit bold H1/H2; H3+ → bold body text |
+| **Native headings** | Every normalized level stays a heading |
+| **All bold text** | All headings → bold body text |
 
-**Copy for Teams** places rich HTML and plain text on the clipboard. If clipboard permissions are blocked, **Select manually** provides a Ctrl/Cmd+C path. The **Rendered / HTML** switch shows either the formatted preview or the exact simplified HTML.
+The selected mode is remembered in browser `localStorage`.
 
-Content and settings remain local to the browser.
-Draft saving is enabled by default and can be disabled in **Settings**; turning it off deletes the stored draft.
+### Formatting
+
+- Two-space indentation creates nested lists.
+- Spacing is context-aware: paragraph breaks are preserved, while headings and lists use native spacing to avoid doubled gaps.
+
+## Copying & privacy
+
+### Copying
+
+- **Copy for Teams** places rich HTML and plain text on the clipboard.
+- **Select manually** is a Ctrl/Cmd+C fallback for when clipboard permissions are blocked.
+- The **Rendered / HTML** switch shows either the formatted preview or the exact simplified HTML.
+
+### Privacy & drafts
+
+- Content and settings stay local to the browser.
+- Draft saving is enabled by default; disabling it in **Settings** deletes the saved draft.
 
 ## Local
 
