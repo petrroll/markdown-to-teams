@@ -320,8 +320,9 @@
       font-family: Consolas, "Courier New", Courier, monospace;
       font-size: 0.875rem;
       line-height: 1.5;
-      white-space: pre-wrap;
-      overflow-wrap: anywhere;
+      white-space: pre;
+      overflow: auto;
+      overflow-wrap: normal;
     }
     #preview > :first-child { margin-top: 0; }
     #preview > :last-child { margin-bottom: 0; }
@@ -482,7 +483,7 @@
         <div class="panel-head">
           <div>
             <div class="panel-title" id="preview-title">Teams preview</div>
-            <div class="panel-meta">Teams-safe · editable</div>
+            <div class="panel-meta" id="preview-meta">Teams-safe · editable</div>
           </div>
           <div class="preview-controls">
             <div class="mode-switch" role="group" aria-label="Preview mode">
@@ -498,7 +499,9 @@
         </div>
         <div class="preview-wrap">
           <div id="preview" contenteditable="true" aria-label="Formatted Teams preview"></div>
-          <pre id="html-preview" aria-label="Generated Teams HTML" hidden></pre>
+          <pre id="html-preview" tabindex="0" role="document"
+            aria-label="Readable generated Teams HTML source. Copy for Teams still copies rich formatting."
+            hidden></pre>
         </div>
       </section>
     </main>
@@ -553,6 +556,7 @@
     const markdown = document.getElementById("markdown");
     const preview = document.getElementById("preview");
     const htmlPreview = document.getElementById("html-preview");
+    const previewMeta = document.getElementById("preview-meta");
     const headingMode = document.getElementById("heading-mode");
     const headingHelp = document.getElementById("heading-help");
     const settingsButton = document.getElementById("settings-button");
@@ -820,7 +824,7 @@
       manualCopyArmed = false;
       preview.innerHTML = renderMarkdown(markdown.value, headingMode.value);
       normalizeBlankLineGroups(preview);
-      if (!htmlPreview.hidden) htmlPreview.textContent = clipboardHtml();
+      if (!htmlPreview.hidden) htmlPreview.textContent = prettifyHtml(clipboardHtml());
       const length = markdown.value.length;
       count.textContent = `${length.toLocaleString()} ${length === 1 ? "character" : "characters"}`;
       localStorage.setItem("markdown-for-teams", markdown.value);
@@ -853,24 +857,93 @@
       return clone.innerHTML;
     }
 
-    function selectPreviewForCopy(message = "Selected — press Ctrl+C to copy.", className = "success") {
-      setPreviewMode("rendered");
-      manualCopyArmed = true;
-      preview.focus();
+    function prettifyHtml(html) {
+      const template = document.createElement("template");
+      template.innerHTML = html;
+      const blockTags = new Set([
+        "DIV", "P", "H1", "H2", "H3", "H4", "H5", "H6", "UL", "OL", "LI",
+        "BLOCKQUOTE", "PRE", "TABLE", "THEAD", "TBODY", "TR", "TH", "TD", "HR"
+      ]);
+      const voidTags = new Set(["BR", "HR"]);
+
+      function escapeText(value) {
+        return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+      }
+
+      function openingTag(element) {
+        const shell = element.cloneNode(false).outerHTML;
+        return shell.slice(0, shell.indexOf(">") + 1);
+      }
+
+      function formatNode(node, depth) {
+        const indent = "  ".repeat(depth);
+        if (node.nodeType === Node.TEXT_NODE) {
+          const text = node.textContent.trim();
+          return text ? [`${indent}${escapeText(text)}`] : [];
+        }
+        if (node.nodeType !== Node.ELEMENT_NODE) return [];
+
+        const element = node;
+        if (voidTags.has(element.tagName) || element.tagName === "PRE") {
+          return [`${indent}${element.outerHTML}`];
+        }
+
+        const hasBlockChildren = [...element.children]
+          .some(child => blockTags.has(child.tagName));
+        if (!hasBlockChildren) return [`${indent}${element.outerHTML}`];
+
+        const lines = [`${indent}${openingTag(element)}`];
+        element.childNodes.forEach(child => lines.push(...formatNode(child, depth + 1)));
+        lines.push(`${indent}</${element.tagName.toLowerCase()}>`);
+        return lines;
+      }
+
+      const lines = [];
+      template.content.childNodes.forEach(node => lines.push(...formatNode(node, 0)));
+      return `${lines.join("\n").trimEnd()}\n`;
+    }
+
+    function selectContents(target) {
+      target.focus();
       const selection = window.getSelection();
       const range = document.createRange();
-      range.selectNodeContents(preview);
+      range.selectNodeContents(target);
       selection.removeAllRanges();
       selection.addRange(range);
+    }
+
+    function selectRenderedForCopy(message, className = "success", switchMode = true) {
+      if (switchMode) setPreviewMode("rendered");
+      manualCopyArmed = true;
+      selectContents(preview);
       status.textContent = message;
       status.className = `status ${className}`;
     }
 
+    function selectVisibleForManualCopy() {
+      if (!htmlPreview.hidden) {
+        manualCopyArmed = false;
+        selectContents(htmlPreview);
+        status.textContent = "HTML source selected — press Ctrl/Cmd+C to copy it as text.";
+        status.className = "status success";
+        return;
+      }
+
+      selectRenderedForCopy(
+        "Rendered preview selected — press Ctrl/Cmd+C to copy Teams-ready formatting.",
+        "success",
+        false
+      );
+    }
+
     function setPreviewMode(mode) {
       const showHtml = mode === "html";
-      if (showHtml) htmlPreview.textContent = clipboardHtml();
+      if (showHtml) htmlPreview.textContent = prettifyHtml(clipboardHtml());
       preview.hidden = showHtml;
       htmlPreview.hidden = !showHtml;
+      previewMeta.textContent = showHtml
+        ? "Readable source · Copy for Teams stays rich"
+        : "Teams-safe · editable";
       document.getElementById("show-rendered").setAttribute("aria-pressed", String(!showHtml));
       document.getElementById("show-html").setAttribute("aria-pressed", String(showHtml));
     }
@@ -901,9 +974,11 @@
             "text/plain": new Blob([preview.innerText], { type: "text/plain" })
           })]);
         } else {
-          selectPreviewForCopy("", "success");
+          const previousMode = htmlPreview.hidden ? "rendered" : "html";
+          selectRenderedForCopy("", "success");
           const copied = document.execCommand("copy");
           window.getSelection().removeAllRanges();
+          if (previousMode === "html") setPreviewMode("html");
           if (!copied) throw new Error("Copy was blocked");
         }
         manualCopyArmed = false;
@@ -912,7 +987,10 @@
         document.getElementById("copy").textContent = "Copied!";
         setTimeout(() => { document.getElementById("copy").textContent = "Copy for Teams"; }, 1600);
       } catch {
-        selectPreviewForCopy("Copy was blocked. Press Ctrl+C to copy the selected preview.", "error");
+        selectRenderedForCopy(
+          "Copy was blocked. Press Ctrl/Cmd+C to copy the selected Teams-ready preview.",
+          "error"
+        );
       }
     }
 
@@ -938,9 +1016,14 @@
       window.open(link.href, "_blank", "noopener,noreferrer");
     });
     document.getElementById("copy").addEventListener("click", copyForTeams);
-    document.getElementById("select-copy").addEventListener("click", () => selectPreviewForCopy());
+    document.getElementById("select-copy").addEventListener("click", selectVisibleForManualCopy);
     document.addEventListener("copy", event => {
       const selection = window.getSelection();
+      if (selection.anchorNode && htmlPreview.contains(selection.anchorNode)) {
+        status.textContent = "HTML source copied as text.";
+        status.className = "status success";
+        return;
+      }
       if (!manualCopyArmed || !selection.anchorNode || !preview.contains(selection.anchorNode)) return;
 
       if (event.clipboardData) {
@@ -950,7 +1033,7 @@
       }
 
       manualCopyArmed = false;
-      status.textContent = "Copied — paste directly into Teams.";
+      status.textContent = "Copied Teams-ready formatting — paste into Teams.";
       status.className = "status success";
     });
     document.getElementById("clear").addEventListener("click", () => {
