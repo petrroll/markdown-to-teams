@@ -6,10 +6,12 @@
   <title>Markdown for Teams</title>
   <script>
     (() => {
-      const param = new URLSearchParams(window.location.search).get("scoutTheme");
+      const params = new URLSearchParams(window.location.search);
+      const param = params.get("scoutTheme");
       const theme =
         param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
       document.documentElement.setAttribute("data-theme", theme);
+      document.documentElement.setAttribute("data-fluent", "full");
     })();
   </script>
   <style>
@@ -80,6 +82,73 @@
       --cp-preview-text-muted: #d6d6d6;
       --cp-preview-link: #a6a7dc;
       --cp-preview-selection: #3d3e66;
+    }
+    html[data-fluent="full"] {
+      --cp-fluent-bg: #f0f0f0;
+      --cp-fluent-surface: #ffffff;
+      --cp-fluent-surface-soft: #f5f5f5;
+      --cp-fluent-border: #e0e0e0;
+      --cp-fluent-border-strong: #d1d1d1;
+      --cp-fluent-text: #242424;
+      --cp-fluent-text-muted: #616161;
+      --cp-fluent-text-soft: #707070;
+      --cp-fluent-accent: #5b5fc7;
+      --cp-fluent-accent-hover: #4f52b2;
+      --cp-fluent-accent-pressed: #4447a3;
+      --cp-fluent-accent-soft: rgba(91, 95, 199, 0.1);
+      --cp-fluent-accent-fg: #ffffff;
+      --cp-fluent-link: #5b5fc7;
+      --cp-fluent-overlay: rgba(0, 0, 0, 0.4);
+      --cp-fluent-focus: rgba(91, 95, 199, 0.22);
+      --cp-fluent-selection: rgba(91, 95, 199, 0.18);
+      --cp-fluent-shadow-rest: 0 1px 2px rgba(0, 0, 0, 0.14), 0 0 2px rgba(0, 0, 0, 0.12);
+      --cp-fluent-shadow-dialog: 0 8px 16px rgba(0, 0, 0, 0.14), 0 0 2px rgba(0, 0, 0, 0.12);
+      --cp-bg: var(--cp-fluent-bg);
+      --cp-bg-elevated: var(--cp-fluent-surface);
+      --cp-surface: var(--cp-fluent-surface);
+      --cp-surface-soft: var(--cp-fluent-surface-soft);
+      --cp-border: var(--cp-fluent-border);
+      --cp-border-strong: var(--cp-fluent-border-strong);
+      --cp-text: var(--cp-fluent-text);
+      --cp-text-muted: var(--cp-fluent-text-muted);
+      --cp-text-soft: var(--cp-fluent-text-soft);
+      --cp-accent: var(--cp-fluent-accent);
+      --cp-accent-hover: var(--cp-fluent-accent-hover);
+      --cp-accent-soft: var(--cp-fluent-accent-soft);
+      --cp-accent-fg: var(--cp-fluent-accent-fg);
+      --cp-link: var(--cp-fluent-link);
+      --cp-overlay: var(--cp-fluent-overlay);
+      --cp-highlight: var(--cp-fluent-focus);
+      --cp-shadow: var(--cp-fluent-shadow-dialog);
+      --cp-preview-bg: var(--cp-fluent-surface);
+      --cp-preview-bg-subtle: var(--cp-fluent-surface-soft);
+      --cp-preview-border: var(--cp-fluent-border);
+      --cp-preview-border-strong: var(--cp-fluent-border-strong);
+      --cp-preview-text: var(--cp-fluent-text);
+      --cp-preview-text-muted: var(--cp-fluent-text-muted);
+      --cp-preview-link: var(--cp-fluent-link);
+      --cp-preview-selection: var(--cp-fluent-selection);
+    }
+    html[data-fluent="full"][data-theme="dark"] {
+      --cp-fluent-bg: #1f1f1f;
+      --cp-fluent-surface: #292929;
+      --cp-fluent-surface-soft: #333333;
+      --cp-fluent-border: #3d3d3d;
+      --cp-fluent-border-strong: #484848;
+      --cp-fluent-text: #ffffff;
+      --cp-fluent-text-muted: #d6d6d6;
+      --cp-fluent-text-soft: #adadad;
+      --cp-fluent-accent: #9ea2ff;
+      --cp-fluent-accent-hover: #b1b4ff;
+      --cp-fluent-accent-pressed: #8589e6;
+      --cp-fluent-accent-soft: rgba(158, 162, 255, 0.14);
+      --cp-fluent-accent-fg: #1f1f1f;
+      --cp-fluent-link: #9ea2ff;
+      --cp-fluent-overlay: rgba(0, 0, 0, 0.5);
+      --cp-fluent-focus: rgba(158, 162, 255, 0.26);
+      --cp-fluent-selection: rgba(158, 162, 255, 0.24);
+      --cp-fluent-shadow-rest: 0 1px 2px rgba(0, 0, 0, 0.4), 0 0 2px rgba(0, 0, 0, 0.34);
+      --cp-fluent-shadow-dialog: 0 8px 16px rgba(0, 0, 0, 0.5), 0 0 2px rgba(0, 0, 0, 0.4);
     }
 
     * { box-sizing: border-box; }
@@ -467,6 +536,168 @@
       gap: 16px;
       color: var(--cp-text-muted);
       font-size: 0.8125rem;
+    }
+    html[data-fluent="full"] body {
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    html[data-fluent="full"] .app {
+      padding: 20px;
+      gap: 16px;
+    }
+    html[data-fluent="full"] header h1 {
+      letter-spacing: -0.01em;
+      font-weight: 600;
+    }
+    html[data-fluent="full"] main { gap: 16px; }
+    html[data-fluent="full"] .header-action,
+    html[data-fluent="full"] button,
+    html[data-fluent="full"] .mode-switch,
+    html[data-fluent="full"] .settings-field select {
+      border-radius: 4px;
+    }
+    html[data-fluent="full"] .header-action:hover {
+      border-color: transparent;
+      background: var(--cp-surface-soft);
+    }
+    html[data-fluent="full"] .panel {
+      border-radius: 8px;
+      box-shadow: var(--cp-fluent-shadow-rest);
+    }
+    html[data-fluent="full"] button:active {
+      transform: none;
+      background: var(--cp-border);
+    }
+    html[data-fluent="full"] button.primary:active {
+      border-color: var(--cp-fluent-accent-pressed);
+      background: var(--cp-fluent-accent-pressed);
+    }
+    html[data-fluent="full"] .mode-switch button {
+      color: var(--cp-text-muted);
+    }
+    html[data-fluent="full"] .mode-switch button[aria-pressed="true"] {
+      border-color: transparent;
+      background: var(--cp-surface);
+      color: var(--cp-accent);
+      box-shadow: var(--cp-fluent-shadow-rest);
+    }
+    html[data-fluent="full"] .app-dialog {
+      border-color: transparent;
+      border-radius: 8px;
+      box-shadow: var(--cp-fluent-shadow-dialog);
+    }
+    html[data-fluent="full"][data-theme="dark"] .app-dialog {
+      border-color: var(--cp-border);
+    }
+    html[data-fluent="full"] .app-dialog::backdrop {
+      backdrop-filter: none;
+    }
+    html[data-fluent="full"] .dialog-head {
+      position: static;
+      padding: 24px 24px 8px;
+      border-bottom: 0;
+    }
+    html[data-fluent="full"] .dialog-head h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      line-height: 28px;
+      letter-spacing: -0.01em;
+    }
+    html[data-fluent="full"] .dialog-close {
+      width: 36px;
+      min-height: 36px;
+      border-color: transparent;
+      border-radius: 4px;
+      background: transparent;
+      color: var(--cp-text-muted);
+      font-size: 1.125rem;
+    }
+    html[data-fluent="full"] .dialog-close:hover {
+      border-color: transparent;
+      background: var(--cp-surface-soft);
+      color: var(--cp-text);
+    }
+    html[data-fluent="full"] .dialog-body {
+      gap: 16px;
+      padding: 8px 24px 24px;
+    }
+    html[data-fluent="full"] .settings-field label,
+    html[data-fluent="full"] .switch-row label {
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    html[data-fluent="full"] .settings-help {
+      margin-top: 4px;
+      line-height: 1.33;
+    }
+    html[data-fluent="full"] .settings-help + .settings-help {
+      margin-top: 2px;
+      color: var(--cp-text-soft);
+    }
+    html[data-fluent="full"] .settings-field select {
+      min-height: 32px;
+      border-color: var(--cp-border-strong);
+      padding: 0 28px 0 10px;
+      box-shadow: inset 0 -1px 0 var(--cp-border-strong);
+    }
+    html[data-fluent="full"] .settings-field select:hover {
+      border-color: var(--cp-text-soft);
+      background: var(--cp-surface);
+    }
+    html[data-fluent="full"] .settings-field select:focus-visible {
+      box-shadow: inset 0 -2px 0 var(--cp-accent);
+    }
+    html[data-fluent="full"] .switch {
+      width: 40px;
+      height: 20px;
+      border-color: var(--cp-border-strong);
+    }
+    html[data-fluent="full"] .switch::before {
+      width: 14px;
+      height: 14px;
+      background: var(--cp-border-strong);
+    }
+    html[data-fluent="full"] .switch:hover {
+      border-color: var(--cp-text-soft);
+    }
+    html[data-fluent="full"] .switch:hover::before {
+      background: var(--cp-text-soft);
+    }
+    html[data-fluent="full"] .switch:checked:hover {
+      border-color: var(--cp-accent-hover);
+      background: var(--cp-accent-hover);
+    }
+    html[data-fluent="full"] .switch:checked:hover::before {
+      background: var(--cp-accent-fg);
+    }
+    html[data-fluent="full"] .switch:checked:active {
+      border-color: var(--cp-fluent-accent-pressed);
+      background: var(--cp-fluent-accent-pressed);
+    }
+    html[data-fluent="full"][data-theme="dark"] .switch::before {
+      background: var(--cp-text-soft);
+    }
+    html[data-fluent="full"][data-theme="dark"] .switch:checked::before {
+      background: var(--cp-accent-fg);
+    }
+    html[data-fluent="full"] .dialog-footer {
+      padding: 8px 24px 24px;
+    }
+    html[data-fluent="full"] .dialog-footer button {
+      min-height: 32px;
+    }
+    html[data-fluent="full"] button:focus-visible,
+    html[data-fluent="full"] textarea:focus-visible,
+    html[data-fluent="full"] select:focus-visible,
+    html[data-fluent="full"] input:focus-visible,
+    html[data-fluent="full"] a:focus-visible,
+    html[data-fluent="full"] #preview:focus,
+    html[data-fluent="full"] #markdown:focus {
+      outline: 2px solid var(--cp-accent);
+      outline-offset: 1px;
+    }
+    html[data-fluent="full"] #markdown::selection {
+      background: var(--cp-fluent-selection);
     }
     @media (max-width: 1200px) {
       main { grid-template-columns: 1fr; }
