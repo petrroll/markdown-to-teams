@@ -1,0 +1,990 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Markdown for Teams</title>
+  <script>
+    (() => {
+      const param = new URLSearchParams(window.location.search).get("scoutTheme");
+      const theme =
+        param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --cp-bg: #f7f4ef;
+      --cp-bg-elevated: #fcfbf8;
+      --cp-surface: #ffffff;
+      --cp-surface-soft: #f5f5f5;
+      --cp-border: #dedede;
+      --cp-border-strong: #919191;
+      --cp-text: #242424;
+      --cp-text-muted: #5c5c5c;
+      --cp-text-soft: #6f6f6f;
+      --cp-accent: #b11f4b;
+      --cp-accent-hover: #9a1a41;
+      --cp-accent-soft: rgba(177, 31, 75, 0.08);
+      --cp-accent-fg: #ffffff;
+      --cp-success: #16a34a;
+      --cp-danger: #dc2626;
+      --cp-warning: #f59e0b;
+      --cp-link: #0078d4;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+      --cp-overlay: rgba(255, 255, 255, 0.8);
+      --cp-panel: rgba(255, 255, 255, 0.86);
+      --cp-panel-strong: rgba(255, 255, 255, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.55);
+      --cp-highlight: rgba(177, 31, 75, 0.12);
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --cp-bg: #3d3b3a;
+      --cp-bg-elevated: #343231;
+      --cp-surface: #292929;
+      --cp-surface-soft: #2e2e2e;
+      --cp-border: #474747;
+      --cp-border-strong: #5f5f5f;
+      --cp-text: #dedede;
+      --cp-text-muted: #919191;
+      --cp-text-soft: #b0b0b0;
+      --cp-accent: #fd8ea1;
+      --cp-accent-hover: #fb7b91;
+      --cp-accent-soft: rgba(253, 142, 161, 0.14);
+      --cp-accent-fg: #1a1a1a;
+      --cp-success: #4ade80;
+      --cp-danger: #f87171;
+      --cp-warning: #fbbf24;
+      --cp-link: #4da6ff;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+      --cp-overlay: rgba(41, 41, 41, 0.88);
+      --cp-panel: rgba(41, 41, 41, 0.72);
+      --cp-panel-strong: rgba(41, 41, 41, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.04);
+      --cp-highlight: rgba(253, 142, 161, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    body {
+      margin: 0;
+      background: var(--cp-bg);
+      color: var(--cp-text);
+      font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    button, textarea, select { font: inherit; }
+    button:focus-visible, textarea:focus-visible, select:focus-visible, a:focus-visible {
+      outline: 3px solid var(--cp-highlight);
+      outline-offset: 2px;
+    }
+    .app {
+      width: min(1440px, 100%);
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    h1 { margin: 0; font-size: clamp(1.65rem, 3vw, 2.25rem); letter-spacing: -0.035em; }
+    .subtitle { margin: 6px 0 0; color: var(--cp-text-muted); }
+    .app-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .header-action {
+      min-height: 40px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border: 1px solid transparent;
+      border-radius: 0.625rem;
+      background: transparent;
+      color: var(--cp-text);
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .header-action:hover {
+      border-color: var(--cp-border);
+      background: var(--cp-surface);
+    }
+    .header-action svg {
+      width: 16px;
+      height: 16px;
+    }
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 20px;
+      min-height: 0;
+    }
+    .panel {
+      min-height: 650px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      background: var(--cp-surface);
+      box-shadow: 0 0 2px var(--cp-border), 0 1px 2px var(--cp-border);
+    }
+    .panel-head {
+      height: 64px;
+      min-height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--cp-border);
+    }
+    .panel-title { font-weight: 650; }
+    .panel-meta { color: var(--cp-text-muted); font-size: 0.8125rem; }
+    .actions { display: flex; gap: 8px; }
+    .preview-controls {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      flex-wrap: nowrap;
+    }
+    .mode-switch {
+      display: flex;
+      gap: 4px;
+      padding: 3px;
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      background: var(--cp-surface-soft);
+    }
+    .mode-switch button {
+      min-height: 28px;
+      padding: 3px 9px;
+      border-color: transparent;
+      background: transparent;
+    }
+    .mode-switch button[aria-pressed="true"] {
+      border-color: var(--cp-accent);
+      background: var(--cp-accent-soft);
+      color: var(--cp-accent);
+      font-weight: 650;
+    }
+    .app-dialog {
+      width: min(440px, calc(100vw - 32px));
+      max-height: 85vh;
+      margin: auto;
+      padding: 0;
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      background: var(--cp-surface);
+      color: var(--cp-text);
+      box-shadow: var(--cp-shadow);
+      overflow: auto;
+    }
+    .app-dialog::backdrop {
+      background: var(--cp-overlay);
+      backdrop-filter: blur(2px);
+    }
+    .dialog-head {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--cp-border);
+      background: var(--cp-surface);
+    }
+    .dialog-head h2 { margin: 0; font-size: 1.125rem; }
+    .dialog-close {
+      width: 36px;
+      min-height: 36px;
+      padding: 0;
+      font-size: 1.25rem;
+      line-height: 1;
+    }
+    .dialog-body {
+      display: grid;
+      gap: 18px;
+      padding: 18px;
+    }
+    .dialog-body p { margin: 0; line-height: 1.5; }
+    .dialog-footer {
+      display: flex;
+      justify-content: flex-end;
+      padding: 12px 18px 18px;
+    }
+    .settings-field {
+      display: grid;
+      gap: 6px;
+    }
+    .settings-field label {
+      font-size: 0.8125rem;
+      font-weight: 650;
+    }
+    .settings-field select {
+      width: 100%;
+      min-height: 38px;
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      background: var(--cp-surface);
+      color: var(--cp-text);
+      padding: 6px 28px 6px 9px;
+    }
+    .settings-help {
+      margin: 2px 0 0;
+      color: var(--cp-text-muted);
+      font-size: 0.75rem;
+      line-height: 1.4;
+    }
+    .about-link { color: var(--cp-link); }
+    button {
+      min-height: 36px;
+      padding: 7px 12px;
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      background: var(--cp-surface);
+      color: var(--cp-text);
+      cursor: pointer;
+      transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
+    }
+    button:hover { background: var(--cp-surface-soft); border-color: var(--cp-border-strong); }
+    button:active { transform: translateY(1px); }
+    button.primary {
+      border-color: var(--cp-accent);
+      background: var(--cp-accent);
+      color: var(--cp-accent-fg);
+      font-weight: 650;
+    }
+    button.primary:hover { background: var(--cp-accent-hover); border-color: var(--cp-accent-hover); }
+    #markdown {
+      flex: 1;
+      width: 100%;
+      min-height: 0;
+      resize: none;
+      border: 0;
+      background: var(--cp-surface);
+      color: var(--cp-text);
+      padding: 20px;
+      font-family: Consolas, "Courier New", Courier, monospace;
+      font-size: 0.9375rem;
+      line-height: 1.65;
+      tab-size: 2;
+    }
+    #markdown:focus { outline: 0; }
+    .preview-wrap {
+      flex: 1;
+      overflow: auto;
+      padding: 0;
+      background: var(--cp-surface);
+    }
+    #preview {
+      min-height: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 20px;
+      border: 0;
+      border-radius: 0;
+      background: var(--cp-surface);
+      color: var(--cp-text);
+      font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+    #preview:focus { outline: 3px solid var(--cp-highlight); }
+    [hidden] { display: none !important; }
+    #html-preview {
+      min-height: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 20px;
+      border: 0;
+      border-radius: 0;
+      background: var(--cp-surface);
+      color: var(--cp-text);
+      font-family: Consolas, "Courier New", Courier, monospace;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+    #preview > :first-child { margin-top: 0; }
+    #preview > :last-child { margin-bottom: 0; }
+    #preview h1 {
+      margin: 20px 0 4px;
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+    #preview h2 {
+      margin: 20px 0 4px;
+      font-size: 20px;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+    #preview h3 {
+      margin: 12px 0 4px;
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 1.5;
+    }
+    #preview h4, #preview h5, #preview h6 {
+      margin: 12px 0 4px;
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.5;
+    }
+    #preview p { margin: 0; }
+    #preview .projected-heading {
+      margin: 12px 0 4px;
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.5;
+    }
+    #preview .blank-line { height: 8px; }
+    #preview ul, #preview ol { margin: 2px 0 8px; padding-left: 22px; }
+    #preview li { margin: 1px 0; }
+    #preview li > ul, #preview li > ol { margin: 2px 0; }
+    #preview blockquote {
+      margin: 8px 0;
+      padding: 8px 12px;
+      border-left: 4px solid var(--cp-accent);
+      background: var(--cp-accent-soft);
+      color: var(--cp-text);
+    }
+    #preview pre {
+      margin: 8px 0;
+      padding: 12px;
+      overflow-x: auto;
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      background: var(--cp-surface-soft);
+      white-space: pre-wrap;
+      line-height: 1.4;
+    }
+    #preview code {
+      border-radius: 4px;
+      background: var(--cp-surface-soft);
+      padding: 0.08em 0.3em;
+      font-family: Consolas, "Courier New", Courier, monospace;
+      font-size: 0.9em;
+    }
+    #preview pre code { padding: 0; background: transparent; }
+    #preview a { color: var(--cp-link); }
+    #preview hr { margin: 12px 0; border: 0; border-top: 1px solid var(--cp-border-strong); }
+    #preview table { width: 100%; margin: 8px 0; border-collapse: collapse; line-height: 1.5; }
+    #preview th, #preview td { padding: 6px 9px; border: 1px solid var(--cp-border); text-align: left; }
+    #preview th { background: var(--cp-surface-soft); }
+    .status {
+      min-height: 22px;
+      color: var(--cp-text-muted);
+      font-size: 0.8125rem;
+      text-align: right;
+    }
+    .status.success { color: var(--cp-success); }
+    .status.error { color: var(--cp-danger); }
+    footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      color: var(--cp-text-muted);
+      font-size: 0.8125rem;
+    }
+    @media (max-width: 1200px) {
+      main { grid-template-columns: 1fr; }
+      .panel { min-height: 520px; }
+    }
+    @media (max-width: 860px) {
+      .app { padding: 16px; }
+      header { align-items: flex-start; flex-direction: column; }
+      .app-nav { justify-content: flex-start; }
+    }
+    @media (max-width: 700px) {
+      .panel-head {
+        height: auto;
+        min-height: 64px;
+        align-items: flex-start;
+        flex-direction: column;
+      }
+      .preview-controls { width: 100%; justify-content: flex-start; }
+    }
+    @media (max-width: 520px) {
+      .app-nav { width: 100%; }
+      .header-action { min-height: 44px; }
+      .mode-switch { width: 100%; }
+      .mode-switch button { flex: 1; }
+      .actions { width: 100%; }
+      .actions button { flex: 1; }
+      footer { flex-direction: column; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <h1>Markdown for Teams</h1>
+        <p class="subtitle">Paste Markdown, then copy rich text that keeps its formatting in Microsoft Teams.</p>
+      </div>
+      <nav class="app-nav" aria-label="App">
+        <button class="header-action" id="about-button" type="button"
+          aria-haspopup="dialog" aria-expanded="false" aria-controls="about-dialog">
+          About
+        </button>
+        <a class="header-action" href="https://github.com/petrroll/markdown-to-teams"
+          target="_blank" rel="noopener noreferrer"
+          aria-label="GitHub repository (opens in new tab)">
+          GitHub <span aria-hidden="true">↗</span>
+        </a>
+        <button class="header-action" id="settings-button" type="button"
+          aria-haspopup="dialog" aria-expanded="false" aria-controls="settings-dialog">
+          <span aria-hidden="true">⚙</span> Settings
+        </button>
+      </nav>
+    </header>
+
+    <main>
+      <section class="panel" aria-labelledby="input-title">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title" id="input-title">Markdown</div>
+            <div class="panel-meta" id="count">0 characters</div>
+          </div>
+          <div class="actions">
+            <button id="sample" type="button">Load sample</button>
+            <button id="clear" type="button">Clear</button>
+          </div>
+        </div>
+        <textarea id="markdown" spellcheck="true" aria-label="Markdown input" placeholder="# Paste your Markdown here&#10;&#10;The preview updates as you type."></textarea>
+      </section>
+
+      <section class="panel" aria-labelledby="preview-title">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title" id="preview-title">Teams preview</div>
+            <div class="panel-meta">Teams-safe · editable</div>
+          </div>
+          <div class="preview-controls">
+            <div class="mode-switch" role="group" aria-label="Preview mode">
+              <button id="show-rendered" type="button" aria-pressed="true">Rendered</button>
+              <button id="show-html" type="button" aria-pressed="false">HTML</button>
+            </div>
+            <div class="actions">
+              <button id="select-copy" type="button">Select manually</button>
+              <button class="primary" id="copy" type="button"
+                title="Copy for Teams (Ctrl/Cmd+Enter)">Copy for Teams</button>
+            </div>
+          </div>
+        </div>
+        <div class="preview-wrap">
+          <div id="preview" contenteditable="true" aria-label="Formatted Teams preview"></div>
+          <pre id="html-preview" aria-label="Generated Teams HTML" hidden></pre>
+        </div>
+      </section>
+    </main>
+
+    <dialog class="app-dialog" id="settings-dialog" aria-labelledby="settings-title">
+      <div class="dialog-head">
+        <h2 id="settings-title">Settings</h2>
+        <button class="dialog-close" type="button" data-close-dialog="settings-dialog"
+          aria-label="Close settings">×</button>
+      </div>
+      <div class="dialog-body">
+        <div class="settings-field">
+          <label for="heading-mode">Heading style</label>
+          <select id="heading-mode">
+            <option value="teams">Teams-optimized</option>
+            <option value="native">Native headings</option>
+            <option value="bold">All bold text</option>
+          </select>
+          <p class="settings-help" id="heading-help">Top three levels become H1/H2/H3; deeper headings become bold text.</p>
+          <p class="settings-help">Applied immediately and saved in this browser.</p>
+        </div>
+      </div>
+      <div class="dialog-footer">
+        <button class="primary" type="button" data-close-dialog="settings-dialog">Done</button>
+      </div>
+    </dialog>
+
+    <dialog class="app-dialog" id="about-dialog" aria-labelledby="about-title">
+      <div class="dialog-head">
+        <h2 id="about-title">About</h2>
+        <button class="dialog-close" type="button" data-close-dialog="about-dialog"
+          aria-label="Close about">×</button>
+      </div>
+      <div class="dialog-body">
+        <p>Microsoft Teams does not render pasted Markdown. This app converts it locally into limited rich HTML that Teams can paste with native formatting.</p>
+        <p>It supports headings, emphasis, links, nested lists, quotes, code, rules, and tables.</p>
+        <p><a class="about-link" href="https://github.com/petrroll/markdown-to-teams#readme"
+          target="_blank" rel="noopener noreferrer">View the README on GitHub ↗</a></p>
+      </div>
+      <div class="dialog-footer">
+        <button class="primary" type="button" data-close-dialog="about-dialog">Done</button>
+      </div>
+    </dialog>
+
+    <footer>
+      <span>Supports headings, emphasis, links, lists, quotes, code, rules, and tables.</span>
+      <span class="status" id="status" aria-live="polite"></span>
+    </footer>
+  </div>
+
+  <script>
+    const markdown = document.getElementById("markdown");
+    const preview = document.getElementById("preview");
+    const htmlPreview = document.getElementById("html-preview");
+    const headingMode = document.getElementById("heading-mode");
+    const headingHelp = document.getElementById("heading-help");
+    const settingsButton = document.getElementById("settings-button");
+    const aboutButton = document.getElementById("about-button");
+    const settingsDialog = document.getElementById("settings-dialog");
+    const aboutDialog = document.getElementById("about-dialog");
+    const count = document.getElementById("count");
+    const status = document.getElementById("status");
+    let manualCopyArmed = false;
+
+    const sample = `# Project update
+
+**Status:** On track ✅
+
+## Highlights
+- Shipped the first milestone
+- Reduced response time by **28%**
+- Added support for \`rich text\` copy
+
+## Next steps
+1. Validate with the team
+2. Address feedback
+3. Roll out broadly
+
+> Please add comments before Friday.
+
+| Owner | Item | Status |
+| --- | --- | --- |
+| Alex | Documentation | Done |
+| Sam | Testing | In progress |
+
+[Open the project](https://teams.microsoft.com)`;
+
+    function escapeHtml(value) {
+      return value
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    function safeUrl(value) {
+      const url = value.trim();
+      return /^(https?:|mailto:)/i.test(url) ? url : "#";
+    }
+
+    function inline(value) {
+      const code = [];
+      let text = escapeHtml(value).replace(/`([^`\n]+)`/g, (_, content) => {
+        const token = `\u0000CODE${code.length}\u0000`;
+        code.push(`<code>${content}</code>`);
+        return token;
+      });
+
+      text = text
+        .replace(/!\[([^\]]*)\]\(([^)\s]+)(?:\s+&quot;.*?&quot;)?\s*\)/g, "$1")
+        .replace(/\[([^\]]+)\]\(([^)\s]+)(?:\s+&quot;.*?&quot;)?\s*\)/g,
+          (_, label, url) => `<a href="${safeUrl(url)}">${label}</a>`)
+        .replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>")
+        .replace(/__([^_\n]+)__/g, "<strong>$1</strong>")
+        .replace(/~~([^~\n]+)~~/g, "<s>$1</s>")
+        .replace(/(^|[^\w])\*([^*\n]+)\*(?!\*)/g, "$1<em>$2</em>")
+        .replace(/(^|[^\w])_([^_\n]+)_(?!_)/g, "$1<em>$2</em>")
+        .replace(/  $/g, "<br>");
+
+      return text.replace(/\u0000CODE(\d+)\u0000/g, (_, index) => code[Number(index)]);
+    }
+
+    function splitCells(line) {
+      return line.trim().replace(/^\||\|$/g, "").split(/(?<!\\)\|/).map(cell => cell.trim());
+    }
+
+    function isTableDivider(line) {
+      const cells = splitCells(line);
+      return cells.length > 0 && cells.every(cell => /^:?-{3,}:?$/.test(cell));
+    }
+
+    function parseListLine(line) {
+      const match = line.match(/^(\s*)([-+*]|\d+[.)])\s+(.+)$/);
+      if (!match) return null;
+      return {
+        indent: match[1].replaceAll("\t", "  ").length,
+        ordered: /^\d/.test(match[2]),
+        content: match[3]
+      };
+    }
+
+    function renderList(lines, start, indent) {
+      const first = parseListLine(lines[start]);
+      const ordered = first.ordered;
+      const tag = ordered ? "ol" : "ul";
+      const items = [];
+      let i = start;
+
+      while (i < lines.length) {
+        const item = parseListLine(lines[i]);
+        if (!item || item.indent < indent) break;
+
+        if (item.indent > indent) {
+          if (!items.length) break;
+          const nested = renderList(lines, i, item.indent);
+          items[items.length - 1].children.push(nested.html);
+          i = nested.next;
+          continue;
+        }
+
+        if (item.ordered !== ordered) break;
+        items.push({ content: item.content, children: [] });
+        i++;
+      }
+
+      const html = `<${tag}>${items.map(item =>
+        `<li>${inline(item.content)}${item.children.join("")}</li>`).join("")}</${tag}>`;
+      return { html, next: i };
+    }
+
+    function findHeadingLevelMap(lines) {
+      let inFence = false;
+      const levels = new Set();
+
+      lines.forEach(line => {
+        if (/^ {0,3}```/.test(line)) {
+          inFence = !inFence;
+          return;
+        }
+        if (inFence) return;
+        const heading = line.match(/^(#{1,6})\s+/);
+        if (!heading) return;
+        levels.add(heading[1].length);
+      });
+
+      return new Map(
+        [...levels].sort((left, right) => left - right)
+          .map((level, index) => [level, index + 1])
+      );
+    }
+
+    function renderMarkdown(source, headingTransform = "teams") {
+      const lines = source.replace(/\r\n?/g, "\n").split("\n");
+      const headingLevels = findHeadingLevelMap(lines);
+      const out = [];
+      let i = 0;
+
+      while (i < lines.length) {
+        const line = lines[i];
+        if (!line.trim()) {
+          out.push('<div class="blank-line" aria-hidden="true"><br></div>');
+          i++;
+          continue;
+        }
+
+        const fence = line.match(/^ {0,3}```(.*)$/);
+        if (fence) {
+          const body = [];
+          i++;
+          while (i < lines.length && !/^ {0,3}```/.test(lines[i])) body.push(lines[i++]);
+          if (i < lines.length) i++;
+          out.push(`<pre><code>${escapeHtml(body.join("\n"))}</code></pre>`);
+          continue;
+        }
+
+        if (i + 1 < lines.length && line.includes("|") && isTableDivider(lines[i + 1])) {
+          const headers = splitCells(line);
+          i += 2;
+          const rows = [];
+          while (i < lines.length && lines[i].includes("|") && lines[i].trim()) {
+            rows.push(splitCells(lines[i++]));
+          }
+          out.push("<table><thead><tr>" + headers.map(cell => `<th>${inline(cell)}</th>`).join("") +
+            "</tr></thead><tbody>" + rows.map(row => "<tr>" +
+              headers.map((_, index) => `<td>${inline(row[index] || "")}</td>`).join("") +
+              "</tr>").join("") + "</tbody></table>");
+          continue;
+        }
+
+        const heading = line.match(/^(#{1,6})\s+(.+)$/);
+        if (heading) {
+          const content = inline(heading[2].replace(/\s+#+\s*$/, ""));
+          const sourceLevel = heading[1].length;
+          const level = headingLevels.get(sourceLevel) || 1;
+          if (headingTransform === "bold" || (headingTransform === "teams" && level > 3)) {
+            out.push(`<p class="projected-heading"><strong>${content}</strong></p>`);
+          } else {
+            out.push(`<h${level}>${content}</h${level}>`);
+          }
+          i++;
+          continue;
+        }
+
+        if (/^ {0,3}([-*_])(?:\s*\1){2,}\s*$/.test(line)) {
+          out.push("<hr>");
+          i++;
+          continue;
+        }
+
+        if (/^ {0,3}>\s?/.test(line)) {
+          const quote = [];
+          while (i < lines.length && /^ {0,3}>\s?/.test(lines[i])) {
+            quote.push(lines[i++].replace(/^ {0,3}>\s?/, ""));
+          }
+          out.push(`<blockquote>${quote.map(part => inline(part)).join("<br>")}</blockquote>`);
+          continue;
+        }
+
+        const list = parseListLine(line);
+        if (list) {
+          const rendered = renderList(lines, i, list.indent);
+          out.push(rendered.html);
+          i = rendered.next;
+          continue;
+        }
+
+        const paragraph = [line.trim()];
+        i++;
+        while (i < lines.length && lines[i].trim() &&
+          !/^(#{1,6})\s+/.test(lines[i]) &&
+          !/^ {0,3}(```|>|\s*([-+*]|\d+[.)])\s+)/.test(lines[i]) &&
+          !(i + 1 < lines.length && lines[i].includes("|") && isTableDivider(lines[i + 1]))) {
+          paragraph.push(lines[i].trim());
+          i++;
+        }
+        out.push(`<p>${inline(paragraph.join(" "))}</p>`);
+      }
+
+      return out.join("") || "<p>Start typing Markdown to see a Teams-ready preview.</p>";
+    }
+
+    function isSpacedBlock(element) {
+      return element?.classList.contains("projected-heading") ||
+        ["H1", "H2", "H3", "H4", "H5", "H6", "UL", "OL", "BLOCKQUOTE", "PRE", "TABLE", "HR"]
+          .includes(element?.tagName);
+    }
+
+    function normalizeBlankLineGroups(root) {
+      const children = [...root.children];
+      let i = 0;
+
+      while (i < children.length) {
+        if (!children[i].classList.contains("blank-line")) {
+          i++;
+          continue;
+        }
+
+        const start = i;
+        while (i < children.length && children[i].classList.contains("blank-line")) i++;
+        const blanks = children.slice(start, i);
+        const before = children[start - 1];
+        const after = children[i];
+
+        if (!before || !after) {
+          blanks.forEach(blank => blank.remove());
+          continue;
+        }
+
+        if (isSpacedBlock(before) || isSpacedBlock(after)) {
+          blanks[0].remove();
+        }
+      }
+    }
+
+    function update() {
+      manualCopyArmed = false;
+      preview.innerHTML = renderMarkdown(markdown.value, headingMode.value);
+      normalizeBlankLineGroups(preview);
+      if (!htmlPreview.hidden) htmlPreview.textContent = clipboardHtml();
+      const length = markdown.value.length;
+      count.textContent = `${length.toLocaleString()} ${length === 1 ? "character" : "characters"}`;
+      localStorage.setItem("markdown-for-teams", markdown.value);
+      status.textContent = "";
+      status.className = "status";
+    }
+
+    function clipboardHtml() {
+      const clone = preview.cloneNode(true);
+      clone.removeAttribute("contenteditable");
+      clone.removeAttribute("id");
+
+      [["strong", "b"], ["em", "i"]].forEach(([from, to]) => {
+        clone.querySelectorAll(from).forEach(element => {
+          const replacement = document.createElement(to);
+          replacement.innerHTML = element.innerHTML;
+          element.replaceWith(replacement);
+        });
+      });
+
+      clone.querySelectorAll(".blank-line").forEach(blankLine => {
+        blankLine.replaceWith(document.createElement("br"));
+      });
+
+      clone.querySelectorAll("*").forEach(element => {
+        element.removeAttribute("class");
+        element.removeAttribute("id");
+        element.removeAttribute("style");
+      });
+      return clone.innerHTML;
+    }
+
+    function selectPreviewForCopy(message = "Selected — press Ctrl+C to copy.", className = "success") {
+      setPreviewMode("rendered");
+      manualCopyArmed = true;
+      preview.focus();
+      const selection = window.getSelection();
+      const range = document.createRange();
+      range.selectNodeContents(preview);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      status.textContent = message;
+      status.className = `status ${className}`;
+    }
+
+    function setPreviewMode(mode) {
+      const showHtml = mode === "html";
+      if (showHtml) htmlPreview.textContent = clipboardHtml();
+      preview.hidden = showHtml;
+      htmlPreview.hidden = !showHtml;
+      document.getElementById("show-rendered").setAttribute("aria-pressed", String(!showHtml));
+      document.getElementById("show-html").setAttribute("aria-pressed", String(showHtml));
+    }
+
+    function wireDialog(dialog, trigger, initialFocus) {
+      trigger.addEventListener("click", () => {
+        trigger.setAttribute("aria-expanded", "true");
+        dialog.showModal();
+        requestAnimationFrame(() => initialFocus.focus({ preventScroll: true }));
+      });
+
+      dialog.addEventListener("close", () => {
+        trigger.setAttribute("aria-expanded", "false");
+        trigger.focus({ preventScroll: true });
+      });
+
+      dialog.addEventListener("click", event => {
+        if (event.target === dialog) dialog.close();
+      });
+    }
+
+    async function copyForTeams() {
+      const html = clipboardHtml();
+      try {
+        if (window.ClipboardItem && navigator.clipboard?.write) {
+          await navigator.clipboard.write([new ClipboardItem({
+            "text/html": new Blob([html], { type: "text/html" }),
+            "text/plain": new Blob([preview.innerText], { type: "text/plain" })
+          })]);
+        } else {
+          selectPreviewForCopy("", "success");
+          const copied = document.execCommand("copy");
+          window.getSelection().removeAllRanges();
+          if (!copied) throw new Error("Copy was blocked");
+        }
+        manualCopyArmed = false;
+        status.textContent = "Copied — paste directly into Teams.";
+        status.className = "status success";
+        document.getElementById("copy").textContent = "Copied!";
+        setTimeout(() => { document.getElementById("copy").textContent = "Copy for Teams"; }, 1600);
+      } catch {
+        selectPreviewForCopy("Copy was blocked. Press Ctrl+C to copy the selected preview.", "error");
+      }
+    }
+
+    markdown.addEventListener("input", update);
+    headingMode.addEventListener("change", () => {
+      localStorage.setItem("markdown-for-teams-heading-mode", headingMode.value);
+      updateHeadingHelp();
+      update();
+    });
+    wireDialog(settingsDialog, settingsButton, headingMode);
+    wireDialog(aboutDialog, aboutButton, aboutDialog.querySelector(".dialog-close"));
+    document.querySelectorAll("[data-close-dialog]").forEach(button => {
+      button.addEventListener("click", () => {
+        document.getElementById(button.dataset.closeDialog).close();
+      });
+    });
+    document.getElementById("show-rendered").addEventListener("click", () => setPreviewMode("rendered"));
+    document.getElementById("show-html").addEventListener("click", () => setPreviewMode("html"));
+    preview.addEventListener("click", event => {
+      const link = event.target.closest("a");
+      if (!link || (!event.ctrlKey && !event.metaKey)) return;
+      event.preventDefault();
+      window.open(link.href, "_blank", "noopener,noreferrer");
+    });
+    document.getElementById("copy").addEventListener("click", copyForTeams);
+    document.getElementById("select-copy").addEventListener("click", () => selectPreviewForCopy());
+    document.addEventListener("copy", event => {
+      const selection = window.getSelection();
+      if (!manualCopyArmed || !selection.anchorNode || !preview.contains(selection.anchorNode)) return;
+
+      if (event.clipboardData) {
+        event.preventDefault();
+        event.clipboardData.setData("text/html", clipboardHtml());
+        event.clipboardData.setData("text/plain", preview.innerText);
+      }
+
+      manualCopyArmed = false;
+      status.textContent = "Copied — paste directly into Teams.";
+      status.className = "status success";
+    });
+    document.getElementById("clear").addEventListener("click", () => {
+      markdown.value = "";
+      update();
+      markdown.focus();
+    });
+    document.getElementById("sample").addEventListener("click", () => {
+      markdown.value = sample;
+      update();
+      markdown.focus();
+    });
+    document.addEventListener("keydown", event => {
+      if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+        event.preventDefault();
+        copyForTeams();
+      }
+    });
+
+    function updateHeadingHelp() {
+      const help = {
+        teams: "Top three levels become H1/H2/H3; deeper headings become bold text.",
+        native: "Every relative level remains a native heading; H3+ may look small in Teams.",
+        bold: "Every heading becomes bold body text with no native heading sizes."
+      };
+      headingHelp.textContent = help[headingMode.value];
+    }
+
+    const savedHeadingMode = localStorage.getItem("markdown-for-teams-heading-mode");
+    const migratedHeadingMode = {
+      normalize: "teams",
+      preserve: "native"
+    }[savedHeadingMode] || savedHeadingMode;
+    if (["teams", "native", "bold"].includes(migratedHeadingMode)) {
+      headingMode.value = migratedHeadingMode;
+    }
+    updateHeadingHelp();
+    markdown.value = localStorage.getItem("markdown-for-teams") || sample;
+    update();
+  </script>
+</body>
+</html>
