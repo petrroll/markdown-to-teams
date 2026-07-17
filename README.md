@@ -17,6 +17,7 @@ Two-space indentation creates nested lists. Ordinary paragraph breaks are preser
 **Copy for Teams** places rich HTML and plain text on the clipboard. If clipboard permissions are blocked, **Select manually** provides a Ctrl/Cmd+C path. The **Rendered / HTML** switch shows either the formatted preview or the exact simplified HTML.
 
 Content and settings remain local to the browser.
+Draft saving is enabled by default and can be disabled in **Settings**; turning it off deletes the stored draft.
 
 ## Local
 

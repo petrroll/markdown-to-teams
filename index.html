@@ -74,8 +74,9 @@
       color: var(--cp-text);
       font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
     }
-    button, textarea, select { font: inherit; }
-    button:focus-visible, textarea:focus-visible, select:focus-visible, a:focus-visible {
+    button, textarea, select, input { font: inherit; }
+    button:focus-visible, textarea:focus-visible, select:focus-visible,
+    input:focus-visible, a:focus-visible {
       outline: 3px solid var(--cp-highlight);
       outline-offset: 2px;
     }
@@ -250,6 +251,48 @@
       color: var(--cp-text-muted);
       font-size: 0.75rem;
       line-height: 1.4;
+    }
+    .switch-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .switch-row label {
+      font-size: 0.8125rem;
+      font-weight: 650;
+    }
+    .switch {
+      appearance: none;
+      width: 44px;
+      height: 24px;
+      flex: 0 0 auto;
+      position: relative;
+      margin: 0;
+      border: 1px solid var(--cp-border-strong);
+      border-radius: 999px;
+      background: var(--cp-surface-soft);
+      cursor: pointer;
+      transition: background 120ms ease, border-color 120ms ease;
+    }
+    .switch::before {
+      content: "";
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: var(--cp-border-strong);
+      transition: transform 120ms ease, background 120ms ease;
+    }
+    .switch:checked {
+      border-color: var(--cp-accent);
+      background: var(--cp-accent);
+    }
+    .switch:checked::before {
+      transform: translateX(20px);
+      background: var(--cp-accent-fg);
     }
     .about-link { color: var(--cp-link); }
     button {
@@ -523,6 +566,14 @@
           <p class="settings-help" id="heading-help">Top two levels become H1/H2; deeper headings become bold text.</p>
           <p class="settings-help">Applied immediately and saved in this browser.</p>
         </div>
+        <div class="settings-field">
+          <div class="switch-row">
+            <label for="save-draft">Save draft in this browser</label>
+            <input class="switch" id="save-draft" type="checkbox" role="switch"
+              aria-describedby="save-draft-help" aria-checked="true" checked>
+          </div>
+          <p class="settings-help" id="save-draft-help">Your Markdown is kept in this browser's local storage so it's here when you return. It never leaves your device.</p>
+        </div>
       </div>
       <div class="dialog-footer">
         <button class="primary" type="button" data-close-dialog="settings-dialog">Done</button>
@@ -559,6 +610,8 @@
     const previewMeta = document.getElementById("preview-meta");
     const headingMode = document.getElementById("heading-mode");
     const headingHelp = document.getElementById("heading-help");
+    const saveDraft = document.getElementById("save-draft");
+    const saveDraftHelp = document.getElementById("save-draft-help");
     const settingsButton = document.getElementById("settings-button");
     const aboutButton = document.getElementById("about-button");
     const settingsDialog = document.getElementById("settings-dialog");
@@ -827,7 +880,7 @@
       if (!htmlPreview.hidden) htmlPreview.textContent = prettifyHtml(clipboardHtml());
       const length = markdown.value.length;
       count.textContent = `${length.toLocaleString()} ${length === 1 ? "character" : "characters"}`;
-      localStorage.setItem("markdown-for-teams", markdown.value);
+      if (saveDraft.checked) localStorage.setItem("markdown-for-teams", markdown.value);
       status.textContent = "";
       status.className = "status";
     }
@@ -1000,6 +1053,21 @@
       updateHeadingHelp();
       update();
     });
+    saveDraft.addEventListener("change", () => {
+      const enabled = saveDraft.checked;
+      saveDraft.setAttribute("aria-checked", String(enabled));
+      localStorage.setItem("markdown-for-teams-save-draft", enabled ? "on" : "off");
+      if (enabled) {
+        localStorage.setItem("markdown-for-teams", markdown.value);
+        status.textContent = "Draft saving on — current text saved in this browser.";
+        status.className = "status success";
+      } else {
+        localStorage.removeItem("markdown-for-teams");
+        status.textContent = "Draft saving off — saved draft deleted.";
+        status.className = "status";
+      }
+      updateSaveDraftHelp();
+    });
     wireDialog(settingsDialog, settingsButton, headingMode);
     wireDialog(aboutDialog, aboutButton, aboutDialog.querySelector(".dialog-close"));
     document.querySelectorAll("[data-close-dialog]").forEach(button => {
@@ -1062,6 +1130,12 @@
       headingHelp.textContent = help[headingMode.value];
     }
 
+    function updateSaveDraftHelp() {
+      saveDraftHelp.textContent = saveDraft.checked
+        ? "Your Markdown is kept in this browser's local storage so it's here when you return. It never leaves your device."
+        : "Draft saving is off. Any saved draft has been deleted from this browser.";
+    }
+
     const savedHeadingMode = localStorage.getItem("markdown-for-teams-heading-mode");
     const migratedHeadingMode = {
       normalize: "teams",
@@ -1071,7 +1145,13 @@
       headingMode.value = migratedHeadingMode;
     }
     updateHeadingHelp();
-    markdown.value = localStorage.getItem("markdown-for-teams") || sample;
+    saveDraft.checked = localStorage.getItem("markdown-for-teams-save-draft") !== "off";
+    saveDraft.setAttribute("aria-checked", String(saveDraft.checked));
+    if (!saveDraft.checked) localStorage.removeItem("markdown-for-teams");
+    updateSaveDraftHelp();
+    markdown.value = saveDraft.checked
+      ? localStorage.getItem("markdown-for-teams") || sample
+      : sample;
     update();
   </script>
 </body>
