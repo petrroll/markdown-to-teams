@@ -237,10 +237,18 @@
       padding: 12px 16px;
       border-bottom: 1px solid var(--cp-border);
     }
+    .panel-head > div:first-child { min-width: 0; }
     .panel-title { font-weight: 650; }
-    .panel-meta { color: var(--cp-text-muted); font-size: 0.8125rem; }
+    .panel-meta {
+      overflow: hidden;
+      color: var(--cp-text-muted);
+      font-size: 0.8125rem;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
     .actions { display: flex; gap: 8px; }
     .preview-controls {
+      flex: 0 0 auto;
       display: flex;
       align-items: center;
       justify-content: flex-end;
@@ -774,7 +782,9 @@
         <div class="panel-head">
           <div>
             <div class="panel-title" id="preview-title">Teams preview</div>
-            <div class="panel-meta" id="preview-meta">Teams-safe · editable</div>
+            <div class="panel-meta" id="preview-meta"
+              title="Rendered Teams-safe preview. The content remains editable."
+              aria-label="Rendered Teams-safe preview. The content remains editable.">Teams-safe · editable</div>
           </div>
           <div class="preview-controls">
             <div class="mode-switch" role="group" aria-label="Preview mode">
@@ -1243,8 +1253,13 @@
       preview.hidden = showHtml;
       htmlPreview.hidden = !showHtml;
       previewMeta.textContent = showHtml
-        ? "Readable source · Copy for Teams stays rich"
+        ? "Readable source · rich on copy"
         : "Teams-safe · editable";
+      const metaDescription = showHtml
+        ? "Readable source view — Copy for Teams still pastes rich formatting."
+        : "Rendered Teams-safe preview. The content remains editable.";
+      previewMeta.title = metaDescription;
+      previewMeta.setAttribute("aria-label", metaDescription);
       document.getElementById("show-rendered").setAttribute("aria-pressed", String(!showHtml));
       document.getElementById("show-html").setAttribute("aria-pressed", String(showHtml));
     }
